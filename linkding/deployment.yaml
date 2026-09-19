@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: linkding
+  name: linkding
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: linkding
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: linkding
+    spec:
+      containers:
+        - image: ghcr.io/sissbruecker/linkding:1.46.2-plus-alpine
+          name: linkding
