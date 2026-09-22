@@ -16,10 +16,10 @@ data:
   custom.css: ""
   custom.js: ""
   bookmarks.yaml: |
-    - Developer:
-        - Github:
-            - abbr: GH
-              href: https://github.com/
+    - Linkding:
+        icon: linkding.png
+        href: http://192.168.1.41:3000
+        description: Bookmark manager
   services.yaml: |
     - My First Group:
         - My First Service:
