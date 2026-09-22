@@ -4,7 +4,7 @@ metadata:
   labels:
     app: linkding
   name: linkding
-  namespace: default
+  namespace: linkding
 spec:
   ports:
   - port: 3000

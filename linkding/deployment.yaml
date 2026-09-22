@@ -21,7 +21,7 @@ spec:
           ports:
             - containerPort: 3000
           volumeMounts:
-            - mountPath: /app/data
+            - mountPath: /etc/linkding/data
               name: linkding-data
       volumes:
         - name: linkding-data
