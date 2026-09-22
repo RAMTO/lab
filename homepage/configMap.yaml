@@ -58,3 +58,7 @@ data:
         provider: duckduckgo
         target: _blank
   docker.yaml: ""
+  # Newer Homepage versions copy skeleton files into /app/config on startup.
+  # With runAsNonRoot + subPath mounts, that directory is not writable, so
+  # every required skeleton file must be present via ConfigMap mount.
+  proxmox.yaml: ""

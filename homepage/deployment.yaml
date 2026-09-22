@@ -79,6 +79,11 @@ spec:
             - mountPath: /app/config/widgets.yaml
               name: homepage-config
               subPath: widgets.yaml
+            # Required skeleton file; without this mount Homepage crashes with
+            # EACCES trying to copy proxmox.yaml into non-writable /app/config
+            - mountPath: /app/config/proxmox.yaml
+              name: homepage-config
+              subPath: proxmox.yaml
             - mountPath: /app/config/logs
               name: logs
       volumes:
