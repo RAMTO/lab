@@ -18,3 +18,5 @@ spec:
       containers:
         - image: ghcr.io/sissbruecker/linkding:1.46.2-plus-alpine
           name: linkding
+          ports:
+            - containerPort: 3000
