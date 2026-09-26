@@ -2,6 +2,8 @@
 
 Private homelab on Tailscale. Apps are exposed via Traefik Ingress on `*.lab.dobreff.net`.
 
+![Homepage dashboard preview](assets/preview.png)
+
 | Host | App |
 |---|---|
 | `https://lab.dobreff.net` | Homepage |
