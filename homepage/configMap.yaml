@@ -29,13 +29,30 @@ data:
               refreshInterval: 60000
               headers:
                 User-Agent: HomepageLab/1.0 (homelab dashboard; +https://lab.dobreff.net)
-                # Homepage substitutes HOMEPAGE_VAR_* from the container env
                 x-cg-demo-api-key: "{{HOMEPAGE_VAR_COINGECKO_API_KEY}}"
               mappings:
                 - field: bitcoin.usd
                   label: USD
                   format: float
                 - field: bitcoin.usd_24h_change
+                  label: 24h %
+                  format: float
+        - Solana:
+            icon: solana.png
+            href: https://www.coingecko.com/en/coins/solana
+            description: SOL / USD
+            widget:
+              type: customapi
+              url: https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd&include_24hr_change=true
+              refreshInterval: 60000
+              headers:
+                User-Agent: HomepageLab/1.0 (homelab dashboard; +https://lab.dobreff.net)
+                x-cg-demo-api-key: "{{HOMEPAGE_VAR_COINGECKO_API_KEY}}"
+              mappings:
+                - field: solana.usd
+                  label: USD
+                  format: float
+                - field: solana.usd_24h_change
                   label: 24h %
                   format: float
   widgets.yaml: |
