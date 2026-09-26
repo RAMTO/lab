@@ -24,7 +24,8 @@ data:
     - Bookmarks:
       - Linkding:
           icon: linkding.png
-          href: http://192.168.1.41:3000
+          # Reachable over Tailscale (was LAN 192.168.1.41)
+          href: http://100.77.58.64:3000
           description: Bookmark manager
   widgets.yaml: |
     - kubernetes:
