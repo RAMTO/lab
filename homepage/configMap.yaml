@@ -29,6 +29,8 @@ data:
               refreshInterval: 60000
               headers:
                 User-Agent: HomepageLab/1.0 (homelab dashboard; +https://lab.dobreff.net)
+                # Homepage substitutes HOMEPAGE_VAR_* from the container env
+                x-cg-demo-api-key: "{{HOMEPAGE_VAR_COINGECKO_API_KEY}}"
               mappings:
                 - field: bitcoin.usd
                   label: USD

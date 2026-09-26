@@ -45,6 +45,12 @@ spec:
             # Pod IP required for probes; lab.dobreff.net is the Ingress host
             - name: HOMEPAGE_ALLOWED_HOSTS
               value: "$(MY_POD_IP):3000,lab.dobreff.net"
+            # Substituted into services.yaml as {{HOMEPAGE_VAR_COINGECKO_API_KEY}}
+            - name: HOMEPAGE_VAR_COINGECKO_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: homepage-secrets
+                  key: coingecko-api-key
           ports:
             - name: http
               containerPort: 3000
