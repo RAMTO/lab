@@ -6,10 +6,12 @@ metadata:
   name: linkding
   namespace: linkding
 spec:
+  type: ClusterIP
   ports:
-  - port: 3000
-    protocol: TCP
-    targetPort: 9090
+    - name: http
+      port: 3000
+      protocol: TCP
+      # Linkding listens on 9090 inside the container
+      targetPort: 9090
   selector:
     app: linkding
-  type: LoadBalancer

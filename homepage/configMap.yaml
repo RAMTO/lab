@@ -22,11 +22,10 @@ data:
               href: https://github.com
   services.yaml: |
     - Bookmarks:
-      - Linkding:
-          icon: linkding.png
-          # Reachable over Tailscale (was LAN 192.168.1.41)
-          href: http://100.77.58.64:3000
-          description: Bookmark manager
+        - Linkding:
+            icon: linkding.png
+            href: https://linkding.lab.dobreff.net
+            description: Bookmark manager
   widgets.yaml: |
     - kubernetes:
         cluster:

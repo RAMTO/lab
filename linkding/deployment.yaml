@@ -4,6 +4,7 @@ metadata:
   labels:
     app: linkding
   name: linkding
+  namespace: linkding
 spec:
   replicas: 1
   selector:
@@ -19,7 +20,12 @@ spec:
         - image: ghcr.io/sissbruecker/linkding:latest
           name: linkding
           ports:
-            - containerPort: 3000
+            - name: http
+              containerPort: 9090
+          env:
+            # Required when serving over https://linkding.lab.dobreff.net
+            - name: LD_CSRF_TRUSTED_ORIGINS
+              value: "https://linkding.lab.dobreff.net"
           volumeMounts:
             - mountPath: /etc/linkding/data
               name: linkding-data

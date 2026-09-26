@@ -66,7 +66,34 @@ subjects:
   - kind: ServiceAccount
     name: lego-issuer
     namespace: ${JOB_NS}
+---
+# Same rights in linkding so the wildcard Secret can be mounted by its Ingress
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: lego-issuer
+  namespace: linkding
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: lego-issuer
+  namespace: linkding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: lego-issuer
+subjects:
+  - kind: ServiceAccount
+    name: lego-issuer
+    namespace: ${JOB_NS}
 EOF
+
+kubectl get ns linkding >/dev/null 2>&1 || kubectl create namespace linkding
 
 kubectl -n "$JOB_NS" delete job "$JOB_NAME" --ignore-not-found
 
@@ -127,7 +154,12 @@ spec:
                 --cert="\$CRT" \\
                 --key="\$KEY" \\
                 --dry-run=client -o yaml | kubectl apply -f -
-              echo "Applied secret ${NAMESPACE}/${SECRET_NAME} (${DOMAIN} + ${WILDCARD})"
+              # Ingress TLS Secrets are namespaced — copy to linkding too
+              kubectl -n linkding create secret tls "${SECRET_NAME}" \\
+                --cert="\$CRT" \\
+                --key="\$KEY" \\
+                --dry-run=client -o yaml | kubectl apply -f -
+              echo "Applied secret ${NAMESPACE}/${SECRET_NAME} and linkding/${SECRET_NAME} (${DOMAIN} + ${WILDCARD})"
           volumeMounts:
             - name: certs
               mountPath: /data
