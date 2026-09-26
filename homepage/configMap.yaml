@@ -18,7 +18,42 @@ data:
             icon: linkding.png
             href: https://linkding.lab.dobreff.net
             description: Bookmark manager
+    - Finance:
+        - Bitcoin:
+            icon: bitcoin.png
+            href: https://www.coingecko.com/en/coins/bitcoin
+            description: BTC / USD
+            widget:
+              type: customapi
+              url: https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true
+              refreshInterval: 60000
+              headers:
+                User-Agent: HomepageLab/1.0 (homelab dashboard; +https://lab.dobreff.net)
+              mappings:
+                - field: bitcoin.usd
+                  label: USD
+                  format: float
+                - field: bitcoin.usd_24h_change
+                  label: 24h %
+                  format: float
   widgets.yaml: |
+    - greeting:
+        text_size: xl
+        text: Welcome to your Homelab, Martin!
+    - datetime:
+        text_size: xl
+        locale: en
+        format:
+          dateStyle: long
+          timeStyle: short
+          hourCycle: h23
+    - openmeteo:
+        label: Sofia
+        latitude: 42.6977
+        longitude: 23.3219
+        timezone: Europe/Sofia
+        units: metric
+        cache: 5
     - kubernetes:
         cluster:
           show: true
@@ -37,8 +72,5 @@ data:
         cpu: true
         memory: true
         network: default
-    - search:
-        provider: duckduckgo
-        target: _blank
   docker.yaml: ""
   proxmox.yaml: ""
