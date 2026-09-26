@@ -1,0 +1,47 @@
+# Let's Encrypt via DNS-01 (required: lab only reachable on Tailscale 100.x).
+# Depends on:
+#   1) cert-manager installed
+#   2) Netlify DNS webhook installed (see issue steps in chat / issue-cert.sh comments)
+#   3) Secret cert-manager/netlify-api-token
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    # Change to your real email — Let's Encrypt expiry notices go here
+    email: admin@dobreff.net
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: letsencrypt-prod-account-key
+    solvers:
+      - dns01:
+          webhook:
+            # Matches chekkan/cert-manager-webhook-netlify default groupName
+            groupName: com.netlify.webhook
+            solverName: netlify
+            config:
+              apiKeySecretRef:
+                name: netlify-api-token
+                key: token
+---
+# Staging issuer — use first to avoid LE rate limits while testing
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+spec:
+  acme:
+    email: admin@dobreff.net
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: letsencrypt-staging-account-key
+    solvers:
+      - dns01:
+          webhook:
+            groupName: com.netlify.webhook
+            solverName: netlify
+            config:
+              apiKeySecretRef:
+                name: netlify-api-token
+                key: token

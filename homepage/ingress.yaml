@@ -11,7 +11,15 @@ metadata:
     gethomepage.dev/group: Cluster Management
     gethomepage.dev/icon: homepage.png
     gethomepage.dev/name: Homepage
+    # TLS secret is created by cert-manager Certificate or tls/issue-cert.sh
+    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - lab.dobreff.net
+        - "*.lab.dobreff.net"
+      secretName: lab-dobreff-net-tls
   rules:
     - host: "lab.dobreff.net"
       http:
