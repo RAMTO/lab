@@ -38,10 +38,10 @@ data:
                   format: float
   widgets.yaml: |
     - greeting:
-        text_size: xl
+        text_size: l
         text: Welcome to your Homelab, Martin!
     - datetime:
-        text_size: xl
+        text_size: m
         locale: en
         format:
           dateStyle: long
