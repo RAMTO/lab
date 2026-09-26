@@ -5,13 +5,9 @@ metadata:
   namespace: linkding
   labels:
     app: linkding
-  # No gethomepage.dev/* annotations — Linkding is listed in homepage ConfigMap
-  # services.yaml. Annotations here would create a second (discovered) tile.
 spec:
   ingressClassName: traefik
   tls:
-    # Same wildcard cert as Homepage — Secret must exist in this namespace
-    # (issue-cert.sh copies homepage/lab-dobreff-net-tls → linkding/)
     - hosts:
         - linkding.lab.dobreff.net
       secretName: lab-dobreff-net-tls

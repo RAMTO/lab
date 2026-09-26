@@ -1,27 +1,19 @@
 #!/usr/bin/env bash
-# Issue / renew a wildcard cert for the lab via Let's Encrypt DNS-01 (Netlify)
-# using a Kubernetes Job. Works with k3s — no Docker CLI required.
-#
-# Covers:
-#   - lab.dobreff.net
-#   - *.lab.dobreff.net  (linkding.lab..., grafana.lab..., etc.)
+# Issue/renew wildcard TLS for lab.dobreff.net + *.lab.dobreff.net (Let's Encrypt DNS-01 / Netlify).
+# Runs as a k3s Job — no Docker CLI required.
 #
 # Prereqs:
-#   - kubectl pointed at the lab cluster
-#   - Netlify A/AAAA or CNAME: *.lab → 100.77.58.64 (and lab → same)
-#   - export NETLIFY_TOKEN='...'
-#   - export ACME_EMAIL='you@dobreff.net'
+#   export NETLIFY_TOKEN='...'
+#   export ACME_EMAIL='you@dobreff.net'
+#   Netlify DNS: lab and *.lab → Tailscale IP
 #
-# Usage:
-#   ./issue-cert.sh
+# Usage: ./issue-cert.sh
 set -euo pipefail
 
-# Apex + wildcard (DNS-01 required for wildcards — already using Netlify)
 DOMAIN="${DOMAIN:-lab.dobreff.net}"
 WILDCARD="*.${DOMAIN}"
 NAMESPACE="${NAMESPACE:-homepage}"
 SECRET_NAME="${SECRET_NAME:-lab-dobreff-net-tls}"
-# lego writes files under this name when --filename is set
 CERT_BASENAME="${CERT_BASENAME:-lab.dobreff.net}"
 EMAIL="${ACME_EMAIL:?set ACME_EMAIL}"
 TOKEN="${NETLIFY_TOKEN:?set NETLIFY_TOKEN}"
@@ -31,6 +23,7 @@ KUBECTL_IMAGE="${KUBECTL_IMAGE:-alpine/k8s:1.32.2}"
 
 kubectl get ns "$JOB_NS" >/dev/null 2>&1 || kubectl create namespace "$JOB_NS"
 kubectl get ns "$NAMESPACE" >/dev/null 2>&1 || kubectl create namespace "$NAMESPACE"
+kubectl get ns linkding >/dev/null 2>&1 || kubectl create namespace linkding
 
 kubectl -n "$JOB_NS" create secret generic netlify-api-token \
   --from-literal=token="$TOKEN" \
@@ -67,7 +60,6 @@ subjects:
     name: lego-issuer
     namespace: ${JOB_NS}
 ---
-# Same rights in linkding so the wildcard Secret can be mounted by its Ingress
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -93,12 +85,8 @@ subjects:
     namespace: ${JOB_NS}
 EOF
 
-kubectl get ns linkding >/dev/null 2>&1 || kubectl create namespace linkding
-
 kubectl -n "$JOB_NS" delete job "$JOB_NAME" --ignore-not-found
 
-# initContainer: lego issues apex + wildcard via Netlify DNS-01
-# container: kubectl applies Secret homepage/lab-dobreff-net-tls
 kubectl apply -f - <<EOF
 apiVersion: batch/v1
 kind: Job
@@ -151,21 +139,18 @@ spec:
               test -f "\$CRT"
               test -f "\$KEY"
               kubectl -n "${NAMESPACE}" create secret tls "${SECRET_NAME}" \\
-                --cert="\$CRT" \\
-                --key="\$KEY" \\
+                --cert="\$CRT" --key="\$KEY" \\
                 --dry-run=client -o yaml | kubectl apply -f -
-              # Ingress TLS Secrets are namespaced — copy to linkding too
               kubectl -n linkding create secret tls "${SECRET_NAME}" \\
-                --cert="\$CRT" \\
-                --key="\$KEY" \\
+                --cert="\$CRT" --key="\$KEY" \\
                 --dry-run=client -o yaml | kubectl apply -f -
-              echo "Applied secret ${NAMESPACE}/${SECRET_NAME} and linkding/${SECRET_NAME} (${DOMAIN} + ${WILDCARD})"
+              echo "Applied ${SECRET_NAME} in ${NAMESPACE} and linkding"
           volumeMounts:
             - name: certs
               mountPath: /data
 EOF
 
-echo "Waiting for Job ${JOB_NS}/${JOB_NAME} (wildcard DNS-01 can take a few min)..."
+echo "Waiting for Job ${JOB_NS}/${JOB_NAME}..."
 if ! kubectl -n "$JOB_NS" wait --for=condition=complete "job/${JOB_NAME}" --timeout=300s; then
   echo "Job failed. Logs:"
   kubectl -n "$JOB_NS" logs "job/${JOB_NAME}" --all-containers || true
@@ -174,7 +159,5 @@ if ! kubectl -n "$JOB_NS" wait --for=condition=complete "job/${JOB_NAME}" --time
 fi
 
 kubectl -n "$JOB_NS" logs "job/${JOB_NAME}" --all-containers
-kubectl apply -f "$(dirname "$0")/../homepage/ingress.yaml" 2>/dev/null || true
 echo "Done. Cert covers ${DOMAIN} and ${WILDCARD}"
 echo "Open https://${DOMAIN}"
-echo "New apps: reuse secret ${NAMESPACE}/${SECRET_NAME} on each Ingress"

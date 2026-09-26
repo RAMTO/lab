@@ -20,17 +20,14 @@ spec:
     spec:
       serviceAccountName: homepage
       automountServiceAccountToken: true
-      dnsPolicy: ClusterFirst
-      enableServiceLinks: true
       containers:
         - name: homepage
-          image: "ghcr.io/gethomepage/homepage:latest"
+          image: ghcr.io/gethomepage/homepage:latest
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
-              drop:
-                - ALL
+              drop: [ALL]
             runAsNonRoot: true
             runAsUser: 1000
             runAsGroup: 1000
@@ -41,9 +38,9 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
+            # Pod IP required for probes; lab.dobreff.net is the Ingress host
             - name: HOMEPAGE_ALLOWED_HOSTS
-              # Pod IP is required for the k8s probe; lab.dobreff.net is the Ingress host
-              value: "$(MY_POD_IP):3000,gethomepage.dev,lab.dobreff.net" # See gethomepage.dev/installation/#homepage_allowed_hosts
+              value: "$(MY_POD_IP):3000,lab.dobreff.net"
           ports:
             - name: http
               containerPort: 3000
@@ -54,6 +51,12 @@ spec:
               port: http
             initialDelaySeconds: 5
             periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /api/healthcheck
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
           volumeMounts:
             - mountPath: /app/config/custom.js
               name: homepage-config
@@ -79,8 +82,7 @@ spec:
             - mountPath: /app/config/widgets.yaml
               name: homepage-config
               subPath: widgets.yaml
-            # Required skeleton file; without this mount Homepage crashes with
-            # EACCES trying to copy proxmox.yaml into non-writable /app/config
+            # Skeleton file must be mounted; /app/config is not writable as uid 1000
             - mountPath: /app/config/proxmox.yaml
               name: homepage-config
               subPath: proxmox.yaml

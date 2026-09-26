@@ -1,31 +1,42 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    app: linkding
   name: linkding
   namespace: linkding
+  labels:
+    app: linkding
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: linkding
-  strategy: {}
   template:
     metadata:
       labels:
         app: linkding
     spec:
       containers:
-        - image: ghcr.io/sissbruecker/linkding:latest
-          name: linkding
+        - name: linkding
+          image: ghcr.io/sissbruecker/linkding:latest
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 9090
           env:
-            # Required when serving over https://linkding.lab.dobreff.net
             - name: LD_CSRF_TRUSTED_ORIGINS
-              value: "https://linkding.lab.dobreff.net"
+              value: https://linkding.lab.dobreff.net
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
           volumeMounts:
             - mountPath: /etc/linkding/data
               name: linkding-data
