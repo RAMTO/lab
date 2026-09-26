@@ -38,7 +38,7 @@ data:
                   label: 24h %
                   format: float
         - Solana:
-            icon: solana.png
+            icon: si-solana
             href: https://www.coingecko.com/en/coins/solana
             description: SOL / USD
             widget:
