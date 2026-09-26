@@ -13,7 +13,7 @@ metadata:
     gethomepage.dev/name: Homepage
 spec:
   rules:
-    - host: "homepage.my.network"
+    - host: "lab.dobreff.net"
       http:
         paths:
           - path: "/"
