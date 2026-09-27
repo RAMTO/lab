@@ -7,7 +7,6 @@ metadata:
     app: car-app
 spec:
   replicas: 1
-  # SQLite cannot have two writers — replace the pod instead of rolling.
   strategy:
     type: Recreate
   selector:
@@ -18,17 +17,13 @@ spec:
       labels:
         app: car-app
     spec:
-      # PVC may be root-owned; fsGroup lets uid 1001 write SQLite files.
       securityContext:
         fsGroup: 1001
         fsGroupChangePolicy: OnRootMismatch
-      # Uncomment if the GHCR package is private:
-      # imagePullSecrets:
-      #   - name: ghcr-pull
       containers:
         - name: car-app
           image: ghcr.io/ramto/car-app:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 3001
