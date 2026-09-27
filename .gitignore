@@ -1,0 +1,3 @@
+# Local secrets (never commit)
+car-app/secret.yaml
+homepage/secret.yaml

@@ -24,6 +24,7 @@ KUBECTL_IMAGE="${KUBECTL_IMAGE:-alpine/k8s:1.32.2}"
 kubectl get ns "$JOB_NS" >/dev/null 2>&1 || kubectl create namespace "$JOB_NS"
 kubectl get ns "$NAMESPACE" >/dev/null 2>&1 || kubectl create namespace "$NAMESPACE"
 kubectl get ns linkding >/dev/null 2>&1 || kubectl create namespace linkding
+kubectl get ns car-app >/dev/null 2>&1 || kubectl create namespace car-app
 
 kubectl -n "$JOB_NS" create secret generic netlify-api-token \
   --from-literal=token="$TOKEN" \
@@ -75,6 +76,30 @@ kind: RoleBinding
 metadata:
   name: lego-issuer
   namespace: linkding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: lego-issuer
+subjects:
+  - kind: ServiceAccount
+    name: lego-issuer
+    namespace: ${JOB_NS}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: lego-issuer
+  namespace: car-app
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: lego-issuer
+  namespace: car-app
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -144,7 +169,10 @@ spec:
               kubectl -n linkding create secret tls "${SECRET_NAME}" \\
                 --cert="\$CRT" --key="\$KEY" \\
                 --dry-run=client -o yaml | kubectl apply -f -
-              echo "Applied ${SECRET_NAME} in ${NAMESPACE} and linkding"
+              kubectl -n car-app create secret tls "${SECRET_NAME}" \\
+                --cert="\$CRT" --key="\$KEY" \\
+                --dry-run=client -o yaml | kubectl apply -f -
+              echo "Applied ${SECRET_NAME} in ${NAMESPACE}, linkding, and car-app"
           volumeMounts:
             - name: certs
               mountPath: /data

@@ -18,6 +18,11 @@ data:
             icon: linkding.png
             href: https://linkding.lab.dobreff.net
             description: Bookmark manager
+    - Vehicles:
+        - Car App:
+            icon: mdi-car
+            href: https://car.lab.dobreff.net
+            description: Passat maintenance tracker
     - Finance:
         - Bitcoin:
             icon: bitcoin.png

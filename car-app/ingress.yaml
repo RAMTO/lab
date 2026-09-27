@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: car-app
+  namespace: car-app
+  labels:
+    app: car-app
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - car.lab.dobreff.net
+      secretName: lab-dobreff-net-tls
+  rules:
+    - host: car.lab.dobreff.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: car-app
+                port:
+                  number: 3001

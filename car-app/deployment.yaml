@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: car-app
+  namespace: car-app
+  labels:
+    app: car-app
+spec:
+  replicas: 1
+  # SQLite cannot have two writers — replace the pod instead of rolling.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: car-app
+  template:
+    metadata:
+      labels:
+        app: car-app
+    spec:
+      # PVC may be root-owned; fsGroup lets uid 1001 write SQLite files.
+      securityContext:
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+      # Uncomment if the GHCR package is private:
+      # imagePullSecrets:
+      #   - name: ghcr-pull
+      containers:
+        - name: car-app
+          image: ghcr.io/ramto/car-app:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3001
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              value: "3001"
+            - name: DATA_DIR
+              value: /app/data
+            - name: VINCARIO_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: car-app-secrets
+                  key: VINCARIO_API_KEY
+            - name: VINCARIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: car-app-secrets
+                  key: VINCARIO_SECRET_KEY
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            runAsNonRoot: true
+            runAsUser: 1001
+            runAsGroup: 1001
+            seccompProfile:
+              type: RuntimeDefault
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - name: car-app-data
+              mountPath: /app/data
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+      volumes:
+        - name: car-app-data
+          persistentVolumeClaim:
+            claimName: car-app-data

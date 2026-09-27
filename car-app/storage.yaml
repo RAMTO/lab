@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: car-app-data
+  namespace: car-app
+  labels:
+    app: car-app
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      # SQLite + WAL — tiny; room for growth
+      storage: 1Gi
