@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: forgejo
+  namespace: forgejo
+  labels:
+    app: forgejo
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - git.lab.dobreff.net
+      secretName: lab-dobreff-net-tls
+  rules:
+    - host: git.lab.dobreff.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: forgejo
+                port:
+                  number: 3000

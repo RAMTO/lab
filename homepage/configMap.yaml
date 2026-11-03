@@ -18,6 +18,11 @@ data:
             icon: linkding.png
             href: https://linkding.lab.dobreff.net
             description: Bookmark manager
+    - Dev:
+        - Forgejo:
+            icon: mdi-git
+            href: https://git.lab.dobreff.net
+            description: Git hosting
     - Vehicles:
         - Car App:
             icon: mdi-car

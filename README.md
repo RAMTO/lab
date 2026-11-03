@@ -9,6 +9,7 @@ Private homelab on Tailscale. Apps are exposed via Traefik Ingress on `*.lab.dob
 | `https://lab.dobreff.net` | Homepage |
 | `https://linkding.lab.dobreff.net` | Linkding |
 | `https://car.lab.dobreff.net` | Car App |
+| `https://git.lab.dobreff.net` | Forgejo |
 
 ## Layout
 
@@ -17,6 +18,7 @@ lab/
   homepage/     # dashboard
   linkding/     # bookmarks
   car-app/      # vehicle maintenance tracker
+  forgejo/      # Git hosting
   tls/          # wildcard cert via Let's Encrypt DNS-01 (Netlify)
 ```
 
@@ -37,7 +39,7 @@ export ACME_EMAIL='you@dobreff.net'
 ./tls/issue-cert.sh
 ```
 
-Writes Secret `lab-dobreff-net-tls` into `homepage`, `linkding`, and `car-app` (TLS Secrets are namespaced).
+Writes Secret `lab-dobreff-net-tls` into `homepage`, `linkding`, `car-app`, and `forgejo` (TLS Secrets are namespaced).
 
 ## Apply
 
@@ -53,6 +55,10 @@ kubectl apply -f linkding/
 # Car App (see car-app/README.md for secrets + seed)
 kubectl apply -f car-app/namespace.yaml
 kubectl apply -f car-app/
+
+# Forgejo (see forgejo/README.md)
+kubectl apply -f forgejo/namespace.yaml
+kubectl apply -f forgejo/
 
 # After ConfigMap changes, restart Homepage (subPath mounts do not hot-reload)
 kubectl rollout restart deploy/homepage -n homepage

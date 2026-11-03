@@ -7,6 +7,9 @@ metadata:
     app: forgejo
 spec:
   replicas: 1
+  # RWO PVC: avoid two pods mounting the same volume during rollouts.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: forgejo
@@ -18,13 +21,34 @@ spec:
       containers:
         - name: forgejo
           image: codeberg.org/forgejo/forgejo:17.0.1
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 3000
               protocol: TCP
+          env:
+            - name: USER_UID
+              value: "1000"
+            - name: USER_GID
+              value: "1000"
+            # Public URL behind Traefik TLS (Forgejo env → app.ini [server]).
+            - name: FORGEJO__server__ROOT_URL
+              value: https://git.lab.dobreff.net/
+            - name: FORGEJO__server__DOMAIN
+              value: git.lab.dobreff.net
+          livenessProbe:
+            httpGet:
+              path: /api/healthz
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /api/healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
           volumeMounts:
-            # Official image stores DB, repos, and config under /data (not /etc/forgejo/data).
             - mountPath: /data
               name: forgejo-data
       volumes:
