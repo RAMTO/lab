@@ -26,6 +26,7 @@ kubectl get ns "$NAMESPACE" >/dev/null 2>&1 || kubectl create namespace "$NAMESP
 kubectl get ns linkding >/dev/null 2>&1 || kubectl create namespace linkding
 kubectl get ns car-app >/dev/null 2>&1 || kubectl create namespace car-app
 kubectl get ns forgejo >/dev/null 2>&1 || kubectl create namespace forgejo
+kubectl get ns yt-transcribe >/dev/null 2>&1 || kubectl create namespace yt-transcribe
 
 kubectl -n "$JOB_NS" create secret generic netlify-api-token \
   --from-literal=token="$TOKEN" \
@@ -133,6 +134,30 @@ subjects:
   - kind: ServiceAccount
     name: lego-issuer
     namespace: ${JOB_NS}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: lego-issuer
+  namespace: yt-transcribe
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: lego-issuer
+  namespace: yt-transcribe
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: lego-issuer
+subjects:
+  - kind: ServiceAccount
+    name: lego-issuer
+    namespace: ${JOB_NS}
 EOF
 
 kubectl -n "$JOB_NS" delete job "$JOB_NAME" --ignore-not-found
@@ -200,7 +225,10 @@ spec:
               kubectl -n forgejo create secret tls "${SECRET_NAME}" \\
                 --cert="\$CRT" --key="\$KEY" \\
                 --dry-run=client -o yaml | kubectl apply -f -
-              echo "Applied ${SECRET_NAME} in ${NAMESPACE}, linkding, car-app, and forgejo"
+              kubectl -n yt-transcribe create secret tls "${SECRET_NAME}" \\
+                --cert="\$CRT" --key="\$KEY" \\
+                --dry-run=client -o yaml | kubectl apply -f -
+              echo "Applied ${SECRET_NAME} in ${NAMESPACE}, linkding, car-app, forgejo, and yt-transcribe"
           volumeMounts:
             - name: certs
               mountPath: /data

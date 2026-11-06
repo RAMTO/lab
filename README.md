@@ -10,6 +10,7 @@ Private homelab on Tailscale. Apps are exposed via Traefik Ingress on `*.lab.dob
 | `https://linkding.lab.dobreff.net` | Linkding |
 | `https://car.lab.dobreff.net` | Car App |
 | `https://git.lab.dobreff.net` | Forgejo |
+| `https://yt-transcribe.lab.dobreff.net` | YouTube transcript → Markdown |
 
 ## Layout
 
@@ -19,6 +20,7 @@ lab/
   linkding/     # bookmarks
   car-app/      # vehicle maintenance tracker
   forgejo/      # Git hosting
+  yt-transcribe/  # YouTube transcript tool
   tls/          # wildcard cert via Let's Encrypt DNS-01 (Netlify)
 ```
 
@@ -39,7 +41,7 @@ export ACME_EMAIL='you@dobreff.net'
 ./tls/issue-cert.sh
 ```
 
-Writes Secret `lab-dobreff-net-tls` into `homepage`, `linkding`, `car-app`, and `forgejo` (TLS Secrets are namespaced).
+Writes Secret `lab-dobreff-net-tls` into `homepage`, `linkding`, `car-app`, `forgejo`, and `yt-transcribe` (TLS Secrets are namespaced). The cert is `*.lab.dobreff.net`, so `yt-transcribe.lab.dobreff.net` is already covered — the script only needs to copy the secret into that namespace.
 
 ## Apply
 
