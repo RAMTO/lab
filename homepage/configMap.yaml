@@ -27,6 +27,14 @@ data:
             icon: mdi-youtube
             href: https://yt-transcribe.lab.dobreff.net
             description: YouTube → Markdown
+        - Video catalog:
+            icon: mdi-movie-open
+            href: https://ig-catalog.lab.dobreff.net
+            description: Saved reels library
+        - Reel downloader:
+            icon: mdi-download
+            href: https://ig-downloader.lab.dobreff.net
+            description: Instagram → categories (homelab)
     - Vehicles:
         - Car App:
             icon: mdi-car
