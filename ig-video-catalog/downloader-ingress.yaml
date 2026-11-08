@@ -1,0 +1,25 @@
+# Holds Instagram session cookies — Tailscale / homelab only; do not expose broadly.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ig-downloader
+  namespace: ig-video-catalog
+  labels:
+    app: ig-downloader
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - ig-downloader.lab.dobreff.net
+      secretName: lab-dobreff-net-tls
+  rules:
+    - host: ig-downloader.lab.dobreff.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ig-downloader
+                port:
+                  number: 8080

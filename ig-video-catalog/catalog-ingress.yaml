@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ig-catalog
+  namespace: ig-video-catalog
+  labels:
+    app: ig-catalog
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - ig-catalog.lab.dobreff.net
+      secretName: lab-dobreff-net-tls
+  rules:
+    - host: ig-catalog.lab.dobreff.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ig-catalog
+                port:
+                  number: 8080

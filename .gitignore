@@ -1,3 +1,4 @@
 # Local secrets (never commit)
 car-app/secret.yaml
 homepage/secret.yaml
+ig-video-catalog/secret.yaml

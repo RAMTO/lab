@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ig-downloader
+  namespace: ig-video-catalog
+  labels:
+    app: ig-downloader
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: ig-downloader
+  template:
+    metadata:
+      labels:
+        app: ig-downloader
+    spec:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      # imagePullSecrets:
+      #   - name: ghcr-pull
+      containers:
+        - name: ig-downloader
+          image: ghcr.io/ramto/ig-downloader:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: CATEGORIES_DIR
+              value: /data/categories
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          volumeMounts:
+            - name: categories
+              mountPath: /data/categories
+            - name: cookies
+              mountPath: /app/cookies.txt
+              subPath: cookies.txt
+              readOnly: true
+      volumes:
+        - name: categories
+          hostPath:
+            path: /srv/ig-videos/categories
+            type: Directory
+        - name: cookies
+          secret:
+            secretName: ig-cookies

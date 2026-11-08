@@ -1,0 +1,15 @@
+# ffmpeg thumbnail cache for the catalog pod (survives restarts).
+# Video files live on hostPath — see catalog-deployment.yaml / downloader-deployment.yaml.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ig-catalog-thumbs
+  namespace: ig-video-catalog
+  labels:
+    app: ig-catalog
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi

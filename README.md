@@ -11,6 +11,8 @@ Private homelab on Tailscale. Apps are exposed via Traefik Ingress on `*.lab.dob
 | `https://car.lab.dobreff.net` | Car App |
 | `https://git.lab.dobreff.net` | Forgejo |
 | `https://yt-transcribe.lab.dobreff.net` | YouTube transcript → Markdown |
+| `https://ig-catalog.lab.dobreff.net` | Instagram video catalog (player) |
+| `https://ig-downloader.lab.dobreff.net` | Reel downloader (homelab only) |
 
 ## Layout
 
@@ -21,6 +23,7 @@ lab/
   car-app/      # vehicle maintenance tracker
   forgejo/      # Git hosting
   yt-transcribe/  # YouTube transcript tool
+  ig-video-catalog/  # IG catalog + downloader (see README)
   tls/          # wildcard cert via Let's Encrypt DNS-01 (Netlify)
 ```
 
@@ -41,7 +44,7 @@ export ACME_EMAIL='you@dobreff.net'
 ./tls/issue-cert.sh
 ```
 
-Writes Secret `lab-dobreff-net-tls` into `homepage`, `linkding`, `car-app`, `forgejo`, and `yt-transcribe` (TLS Secrets are namespaced). The cert is `*.lab.dobreff.net`, so `yt-transcribe.lab.dobreff.net` is already covered — the script only needs to copy the secret into that namespace.
+Writes Secret `lab-dobreff-net-tls` into `homepage`, `linkding`, `car-app`, `forgejo`, `yt-transcribe`, and `ig-video-catalog` (TLS Secrets are namespaced). The cert is `*.lab.dobreff.net`, so new `*.lab.dobreff.net` hosts are covered — the script only needs to copy the secret into each app namespace.
 
 ## Apply
 
@@ -61,6 +64,14 @@ kubectl apply -f car-app/
 # Forgejo (see forgejo/README.md)
 kubectl apply -f forgejo/namespace.yaml
 kubectl apply -f forgejo/
+
+# yt-transcribe
+kubectl apply -f yt-transcribe/namespace.yaml
+kubectl apply -f yt-transcribe/
+
+# ig-video-catalog (see ig-video-catalog/README.md for cookies secret + NVMe path)
+kubectl apply -f ig-video-catalog/namespace.yaml
+kubectl apply -f ig-video-catalog/
 
 # After ConfigMap changes, restart Homepage (subPath mounts do not hot-reload)
 kubectl rollout restart deploy/homepage -n homepage
